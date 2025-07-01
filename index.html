@@ -12,112 +12,137 @@
       background-color: #1e1e1e;
       color: #f0f0f0;
       font-family: Arial, sans-serif;
-      font-size: 13px;
+      font-size: 14px;
     }
-    #container {
-      max-width: 1000px;
-      margin: 0 auto;
-      height: 100%;
+
+    body {
       display: flex;
       flex-direction: column;
-    }
-    h1 {
-      text-align: center;
-      color: #ffa500;
-      font-size: 18px;
-      margin: 6px 0;
-    }
-    .top-controls {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 0 10px;
-      margin-bottom: 4px;
+      padding: 1em;
+      box-sizing: border-box;
     }
-    label {
-      margin-right: 10px;
+
+    h1 {
+      color: #ffa500;
+      margin: 0.2em;
+      font-size: 20px;
     }
-    input[type="number"] {
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1em;
+      margin: 0.5em 0;
+      flex-wrap: wrap;
+    }
+
+    .controls img {
+      width: 20px;
+      height: 20px;
+      vertical-align: middle;
+    }
+
+    .controls input[type="number"] {
       width: 80px;
-      font-size: 13px;
     }
+
     #sortBtn {
-      padding: 4px 10px;
-      font-size: 13px;
+      padding: 4px 8px;
+      font-size: 14px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      flex: 1;
+      font-size: 13px;
+      flex-grow: 1;
       overflow-y: auto;
+      display: block;
     }
-    th, td {
-      border: 1px solid #888;
-      padding: 4px;
-      text-align: center;
-    }
-    th {
+
+    thead {
       background-color: #333;
       position: sticky;
       top: 0;
     }
+
+    th, td {
+      border: 1px solid #888;
+      padding: 4px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .copy-btn {
+      cursor: pointer;
+      padding: 2px 6px;
+      background: #444;
+      border: none;
+      color: white;
+      border-radius: 4px;
+    }
+
+    .copy-btn:hover {
+      background: #666;
+    }
+
     .positive {
       color: lightgreen;
       font-weight: bold;
     }
+
     .negative {
       color: salmon;
       font-weight: bold;
     }
+
     .red-x {
       color: red;
       font-weight: bold;
     }
-    .copy-btn {
-      cursor: pointer;
-      padding: 2px 6px;
-      font-size: 12px;
-      background: #444;
-      border: none;
-      color: white;
-      border-radius: 3px;
+
+    .container {
+      width: 1000px;
+      height: calc(100vh - 60px);
+      display: flex;
+      flex-direction: column;
     }
-    .copy-btn:hover {
-      background: #666;
-    }
-    img.ess-img {
-      width: 20px;
-      height: 20px;
-      vertical-align: middle;
-      margin-right: 4px;
+
+    .table-container {
+      overflow-y: auto;
+      flex-grow: 1;
     }
   </style>
 </head>
 <body>
-  <div id="container">
+  <div class="container">
     <h1>Essence Exchange Simulator</h1>
-    <div class="top-controls">
-      <div>
-        <strong>Used:</strong> 30 LF
-        <label>
-          Div per LF:
-          <input type="number" id="lfDivRate" value="7150" />
-        </label>
-      </div>
-      <button id="sortBtn">Sort by Profit ▼</button>
+    <div class="controls">
+      <label>
+        <img src="PrimalLifeforce.png" alt="LF"> Used Life Force: <strong>30</strong>
+      </label>
+      <label>
+        Div per 1 Essence:
+        <input type="number" id="lfDivRate" value="7150" />
+      </label>
+      <button id="sortBtn">Sort by Profit ▲</button>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Copy</th>
-          <th>Essence</th>
-          <th>Sell Price<br>(1div = ?)</th>
-          <th>Profitable</th>
-          <th>Profit (div)</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>📋</th>
+            <th>Essence</th>
+            <th>Sell (units/div)</th>
+            <th>Profit?</th>
+            <th>Profit (div)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
@@ -127,14 +152,17 @@
       "Sorrow", "Anger", "Anguish", "Greed", "Dread", "Doubt", "Suffering"
     ];
 
-    let prices = {};
-    essences.forEach(name => prices[name] = 0);
+    let prices = JSON.parse(localStorage.getItem("essencePrices")) || {};
+    essences.forEach(name => {
+      if (!prices[name]) prices[name] = 0;
+    });
 
-    let sortDescending = false;
+    let sortDescending = JSON.parse(localStorage.getItem("sortDescending")) ?? false;
 
     function renderTable() {
       const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
-      const cost = 30 / lfDivRate;
+      const lf = 30;
+      const cost = lf / lfDivRate;
 
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -148,7 +176,7 @@
           const c = parseFloat(prices[e]);
           return c === 0 ? 0 : 1 / c;
         });
-        const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / others.length;
+        const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / otherPrices.length;
 
         const profit = avgPrice - pricePerUnit - cost;
         const isProfit = profit >= 0;
@@ -156,8 +184,8 @@
         return {
           name,
           priceInput: unitCount,
-          profit,
-          isProfit,
+          profit: profit,
+          isProfit: isProfit,
           pricePerUnit
         };
       });
@@ -166,11 +194,14 @@
         rows.sort((a, b) => b.profit - a.profit);
       }
 
+      document.getElementById("sortBtn").textContent = sortDescending
+        ? "Sort by Profit ▼" : "Sort by Profit ▲";
+
       rows.forEach(row => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><button class="copy-btn" onclick="copyName('${row.name}')">📋</button></td>
-          <td><img src="${row.name}7.png" alt="${row.name}" class="ess-img">${row.name}</td>
+          <td><img src="${row.name}7.png" alt="${row.name}" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;">${row.name}</td>
           <td><input type="number" value="${row.priceInput}" step="1" min="1" onchange="updatePrice('${row.name}', this.value)"></td>
           <td class="${row.isProfit ? 'positive' : 'negative'}">
             ${row.isProfit ? '〇' : '<span class="red-x">×</span>'}
@@ -183,6 +214,7 @@
 
     function updatePrice(name, value) {
       prices[name] = parseFloat(value) || 0;
+      localStorage.setItem("essencePrices", JSON.stringify(prices));
       renderTable();
     }
 
@@ -190,10 +222,13 @@
       navigator.clipboard.writeText(name);
     }
 
-    document.getElementById("lfDivRate").addEventListener("input", renderTable);
+    document.getElementById("lfDivRate").addEventListener("input", () => {
+      renderTable();
+    });
+
     document.getElementById("sortBtn").addEventListener("click", () => {
       sortDescending = !sortDescending;
-      document.getElementById("sortBtn").textContent = sortDescending ? "Sort by Profit ▼" : "Sort by Profit ▲";
+      localStorage.setItem("sortDescending", JSON.stringify(sortDescending));
       renderTable();
     });
 
