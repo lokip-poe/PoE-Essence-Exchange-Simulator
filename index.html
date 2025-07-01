@@ -1,72 +1,176 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 1em auto;
-  max-width: 1000px;
-  padding: 0 1em;
-  background-color: #1e1e1e;
-  color: #f0f0f0;
-  font-size: 14px;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Essence Exchange Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em auto;
+      max-width: 1000px;
+      padding: 0 1em;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+      color: #ffa500;
+    }
+    table {
+      width: 100%;
+      margin-top: 1em;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #888;
+      padding: 6px;
+      text-align: center;
+    }
+    th {
+      background-color: #333;
+    }
+    .positive {
+      color: lightgreen;
+      font-weight: bold;
+    }
+    .negative {
+      color: salmon;
+      font-weight: bold;
+    }
+    .copy-btn {
+      cursor: pointer;
+      padding: 4px 8px;
+      background: #444;
+      border: none;
+      color: white;
+      border-radius: 4px;
+    }
+    .copy-btn:hover {
+      background: #666;
+    }
+    .red-x {
+      color: red;
+      font-weight: bold;
+    }
+    input[type="number"] {
+      width: 80px;
+    }
+    #sortBtn {
+      margin-top: 1em;
+      padding: 6px 12px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Essence Exchange Simulator</h1>
 
-h1 {
-  text-align: center;
-  color: #ffa500;
-  font-size: 20px;
-  margin: 0.5em 0;
-}
+  <label>
+    Life Force（個数）:
+    <input type="number" id="lf" value="30" />
+  </label>
+  <label>
+    Life Forceのdivあたり個数:
+    <input type="number" id="lfDivRate" value="7150" />
+  </label>
 
-label {
-  display: inline-block;
-  margin-right: 1em;
-}
+  <button id="sortBtn">利益が高い順に並び替え</button>
 
-input[type="number"] {
-  width: 70px;
-  padding: 2px;
-  font-size: 14px;
-}
+  <table>
+    <thead>
+      <tr>
+        <th>📋</th>
+        <th>Essence</th>
+        <th>売価（1divあたりの個数）</th>
+        <th>損益</th>
+        <th>利益（div）</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
 
-#sortBtn {
-  margin: 0.5em 0;
-  padding: 4px 10px;
-  font-size: 14px;
-}
+  <script>
+    const essences = [
+      "Envy", "Scorn", "Spite", "Contempt", "Rage", "Fear", "Zeal",
+      "Woe", "Wrath", "Loathing", "Torment", "Misery", "Hatred",
+      "Sorrow", "Anger", "Anguish", "Greed", "Dread", "Doubt", "Suffering"
+    ];
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  max-height: 500px; /* 高さ制限 */
-  overflow-y: auto;
-  display: block;
-}
+    let prices = {};
+    essences.forEach(name => prices[name] = 0);
 
-thead {
-  background-color: #333;
-  position: sticky;
-  top: 0;
-}
+    let sortDescending = true;
 
-th, td {
-  border: 1px solid #888;
-  padding: 4px;
-  text-align: center;
-}
+    function renderTable() {
+      const lf = parseFloat(document.getElementById("lf").value);
+      const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
+      const cost = lf * (1 / lfDivRate); // 1個あたりdivで計算
 
-.copy-btn {
-  padding: 2px 6px;
-  font-size: 13px;
-}
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
 
-.positive {
-  color: lightgreen;
-  font-weight: bold;
-}
-.negative {
-  color: salmon;
-  font-weight: bold;
-}
-.red-x {
-  color: red;
-  font-weight: bold;
-}
+      const rows = essences.map(name => {
+        const unitCount = parseFloat(prices[name]) || 0;
+        const pricePerUnit = unitCount === 0 ? 0 : 1 / unitCount;
+
+        // 他19個の平均価格を出す
+        const others = essences.filter(e => e !== name);
+        const otherPrices = others.map(e => {
+          const c = parseFloat(prices[e]);
+          return c === 0 ? 0 : 1 / c;
+        });
+        const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / otherPrices.length;
+
+        const profit = avgPrice - cost;
+        const isProfit = profit >= 0;
+
+        return {
+          name,
+          priceInput: unitCount,
+          profit: profit,
+          isProfit: isProfit,
+          pricePerUnit
+        };
+      });
+
+      if (sortDescending) {
+        rows.sort((a, b) => b.profit - a.profit);
+      }
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><button class="copy-btn" onclick="copyName('${row.name}')">📋</button></td>
+          <td>${row.name}</td>
+          <td><input type="number" value="${row.priceInput}" step="1" min="1" onchange="updatePrice('${row.name}', this.value)"></td>
+          <td class="${row.isProfit ? 'positive' : 'negative'}">
+            ${row.isProfit ? '〇' : '<span class="red-x">×</span>'}
+          </td>
+          <td>${row.profit.toFixed(5)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updatePrice(name, value) {
+      prices[name] = parseFloat(value) || 0;
+      renderTable();
+    }
+
+    function copyName(name) {
+      navigator.clipboard.writeText(name).then(() => {
+        alert(`Copied: ${name}`);
+      });
+    }
+
+    document.getElementById("lf").addEventListener("input", renderTable);
+    document.getElementById("lfDivRate").addEventListener("input", renderTable);
+    document.getElementById("sortBtn").addEventListener("click", () => {
+      sortDescending = !sortDescending;
+      renderTable();
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>
