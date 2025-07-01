@@ -55,10 +55,13 @@
 <body>
   <h1>Essence Exchange Simulator</h1>
   <p style="text-align:center;">Your companion for Essence farming</p>
-<label style="display: flex; align-items: center; gap: 8px;">
-  <img src="PrimalLifeforce.png" alt="Life Force" style="width:30px; height:30px;">
-  <span>Life Force:</span>
+<label style="font-size: 1.2em;">
+  <img src="PrimalLifeforce.png" alt="Life Force"
+    style="width:30px; height:30px; display:inline-block; vertical-align:middle; margin-right:6px;">
+  Life Force:
   <input type="number" id="lf" value="7150" />
+</label>
+
 </label>
 
   
@@ -112,10 +115,12 @@
 
         const tr = document.createElement("tr");
    tr.innerHTML = `
-  <td>
-    <img src="${e.name}7.png" alt="${e.name}" style="width:30px; height:30px; vertical-align:middle; margin-right:4px;">
-    ${e.name}
-  </td>
+<td>
+  <img src="${e.name}7.png" alt="${e.name}"
+    style="width:30px; height:30px; display:inline-block; vertical-align:middle; margin-right:6px;">
+  ${e.name}
+</td>
+
   <td>${e.count}</td>
   <td>${e.div.toFixed(5)}</td>
   <td>${calc.toFixed(5)}</td>
