@@ -218,7 +218,7 @@
         }))
       };
 
-      fetch('https://script.google.com/macros/s/AKfycbyHkf80rSDMgOHku-Gx9neNbZCW_tPrDCyBK7mwu8-SaivMWuxTRaKyYO3fNOY6T7Kx/exec', {
+     fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
@@ -227,7 +227,7 @@
     }
 
     function loadMedianData() {
-      fetch('https://script.google.com/macros/s/AKfycbyHkf80rSDMgOHku-Gx9neNbZCW_tPrDCyBK7mwu8-SaivMWuxTRaKyYO3fNOY6T7Kx/exec?mode=median')
+    fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec')
         .then(res => res.json())
         .then(data => {
           if (!data || !data.prices) {
