@@ -12,7 +12,7 @@
       background-color: #1e1e1e;
       color: #f0f0f0;
       font-size: 14px;
-      overflow-y: auto;
+      overflow-y: hidden; /* ← ここで縦スクロール禁止 */
     }
 
     h1 {
@@ -43,8 +43,6 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
-      overflow-y: auto;
-      display: block;
       max-height: 600px;
     }
 
@@ -182,8 +180,9 @@
         tbody.appendChild(tr);
       });
 
-      const btn = document.getElementById("sortBtn");
-      btn.textContent = sortDescending ? "Sort by Profit ↓" : "Sort by Profit ↑";
+      document.getElementById("sortBtn").textContent = sortDescending
+        ? "Sort by Profit ↓"
+        : "Sort by Profit ↑";
     }
 
     function updatePrice(name, value) {
