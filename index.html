@@ -1,138 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Essence Exchange Simulator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 2em auto;
-      max-width: 900px;
-      padding: 0 1em;
-      background-color: #1e1e1e;
-      color: #f0f0f0;
-    }
-    h1 {
-      text-align: center;
-      color: #ffa500;
-    }
-    label {
-      font-size: 1.2em;
-    }
-    input {
-      width: 100px;
-      font-size: 1em;
-      margin-left: 0.5em;
-    }
-    table {
-      width: 100%;
-      margin-top: 2em;
-      border-collapse: collapse;
-      font-size: 0.95em;
-    }
-    th, td {
-      border: 1px solid #888;
-      padding: 6px;
-      text-align: center;
-    }
-    th {
-      background-color: #333;
-    }
-    .positive {
-      color: lightgreen;
-    }
-    .negative {
-      color: salmon;
-    }
-    img {
-      width: 100%;
-      max-height: 200px;
-      object-fit: cover;
-      margin-bottom: 1em;
-    }
-  </style>
-</head>
-<body>
-  <h1>Essence Exchange Simulator</h1>
-  <p style="text-align:center;">Your companion for Essence farming</p>
-<label style="font-size: 1.2em;">
-  <img src="PrimalLifeforce.png" alt="Life Force"
-    style="width:30px; height:30px; display:inline-block; vertical-align:middle; margin-right:6px;">
-  Life Force:
-  <input type="number" id="lf" value="7150" />
-</label>
+body {
+  font-family: Arial, sans-serif;
+  margin: 1em auto;
+  max-width: 1000px;
+  padding: 0 1em;
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  font-size: 14px;
+}
 
-</label>
+h1 {
+  text-align: center;
+  color: #ffa500;
+  font-size: 20px;
+  margin: 0.5em 0;
+}
 
-  
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Count</th>
-        <th>Div Value</th>
-        <th>Calc</th>
-        <th>Diff</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+label {
+  display: inline-block;
+  margin-right: 1em;
+}
 
-  <script>
-    const essences = [
-      { name: "Envy", count: 20, div: 0.03125 },
-      { name: "Scorn", count: 19, div: 0.05882 },
-      { name: "Spite", count: 15, div: 0.04167 },
-      { name: "Contempt", count: 4, div: 0.02083 },
-      { name: "Rage", count: 10, div: 0.02083 },
-      { name: "Fear", count: 8, div: 0.01449 },
-      { name: "Zeal", count: 16, div: 0.01887 },
-      { name: "Woe", count: 2, div: 0.02326 },
-      { name: "Wrath", count: 11, div: 0.01695 },
-      { name: "Loathing", count: 14, div: 0.01639 },
-      { name: "Torment", count: 7, div: 0.01493 },
-      { name: "Misery", count: 17, div: 0.01429 },
-      { name: "Hatred", count: 1, div: 0.01563 },
-      { name: "Sorrow", count: 5, div: 0.01429 },
-      { name: "Anger", count: 6, div: 0.01538 },
-      { name: "Anguish", count: 13, div: 0.01316 },
-      { name: "Greed", count: 3, div: 0.01493 },
-      { name: "Dread", count: 18, div: 0.01370 },
-      { name: "Doubt", count: 12, div: 0.01250 },
-      { name: "Suffering", count: 9, div: 0.01250 }
-    ];
+input[type="number"] {
+  width: 70px;
+  padding: 2px;
+  font-size: 14px;
+}
 
-    const divRef = 0.00420;
+#sortBtn {
+  margin: 0.5em 0;
+  padding: 4px 10px;
+  font-size: 14px;
+}
 
-    function renderTable() {
-      const lf = parseFloat(document.getElementById("lf").value);
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  max-height: 500px; /* 高さ制限 */
+  overflow-y: auto;
+  display: block;
+}
 
-      essences.forEach(e => {
-        const calc = e.div * lf * divRef;
-        const diff = e.div - divRef;
+thead {
+  background-color: #333;
+  position: sticky;
+  top: 0;
+}
 
-        const tr = document.createElement("tr");
-   tr.innerHTML = `
-<td>
-  <img src="${e.name}7.png" alt="${e.name}"
-    style="width:30px; height:30px; display:inline-block; vertical-align:middle; margin-right:6px;">
-  ${e.name}
-</td>
+th, td {
+  border: 1px solid #888;
+  padding: 4px;
+  text-align: center;
+}
 
-  <td>${e.count}</td>
-  <td>${e.div.toFixed(5)}</td>
-  <td>${calc.toFixed(5)}</td>
-  <td class="${diff >= 0 ? 'positive' : 'negative'}">${diff.toFixed(5)}</td>
-`;
+.copy-btn {
+  padding: 2px 6px;
+  font-size: 13px;
+}
 
-        tbody.appendChild(tr);
-      });
-    }
-
-    document.getElementById("lf").addEventListener("input", renderTable);
-    renderTable();
-  </script>
-</body>
-</html>
+.positive {
+  color: lightgreen;
+  font-weight: bold;
+}
+.negative {
+  color: salmon;
+  font-weight: bold;
+}
+.red-x {
+  color: red;
+  font-weight: bold;
+}
