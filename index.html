@@ -221,6 +221,31 @@
     function copyName(name) {
       navigator.clipboard.writeText(name);
     }
+function sendDataToSheet() {
+  const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
+  const payload = {
+    timestamp: new Date().toISOString(),
+    lfDivRate: lfDivRate,
+    prices: essences.map(name => ({
+      name,
+      price: parseFloat(prices[name]) || 0
+    }))
+  };
+
+  fetch('https://script.google.com/macros/s/AKfycbyHkf80rSDMgOHku-Gx9neNbZCW_tPrDCyBK7mwu8-SaivMWuxTRaKyYO3fNOY6T7Kx/exec', {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    alert('Sent!');
+  }).catch(err => {
+    alert('Send failed');
+    console.error(err);
+  });
+}
 
     document.getElementById("lfDivRate").addEventListener("input", () => {
       renderTable();
