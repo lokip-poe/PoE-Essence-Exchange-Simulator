@@ -20,13 +20,11 @@
       margin: 0.5em 0;
     }
     label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0.5em 1em 0.5em 0;
+      display: inline-block;
+      margin-right: 1em;
     }
     input[type="number"] {
-      width: 80px;
+      width: 70px;
       padding: 2px;
       font-size: 14px;
     }
@@ -40,24 +38,22 @@
       border-collapse: collapse;
       font-size: 13px;
     }
-    thead {
-      background-color: #333;
-      position: sticky;
-      top: 0;
-    }
     th, td {
       border: 1px solid #888;
       padding: 4px;
       text-align: center;
     }
+    th {
+      background-color: #333;
+    }
     .copy-btn {
-      cursor: pointer;
       padding: 2px 6px;
       font-size: 13px;
       background-color: #444;
-      border: none;
       color: white;
-      border-radius: 4px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
     }
     .copy-btn:hover {
       background-color: #666;
@@ -74,16 +70,11 @@
       color: red;
       font-weight: bold;
     }
-    .ess-img {
+    .essence-img {
       width: 30px;
       height: 30px;
       vertical-align: middle;
-      margin-right: 6px;
-    }
-    .inline-img {
-      width: 30px;
-      height: 30px;
-      vertical-align: middle;
+      margin-right: 4px;
     }
   </style>
 </head>
@@ -91,9 +82,7 @@
   <h1>Essence Exchange Simulator</h1>
 
   <label>
-    <img src="PrimalLifeforce.png" alt="LF" class="inline-img">
-    Life Force（使う数）:
-    <input type="number" id="lf" value="30" disabled />
+    Life Force（使用数固定: 30個）
   </label>
   <label>
     Life Forceのdivあたり個数:
@@ -125,18 +114,18 @@
     let prices = {};
     essences.forEach(name => prices[name] = 0);
 
-    let sortDescending = true;
+    let sortDescending = false; // 最初は利益が高い順
 
     function renderTable() {
       const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
-      const divRef = 30 / lfDivRate;
+      const divRef = 30 / lfDivRate; // 変換コスト（固定30個）
 
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
 
       const rows = essences.map(name => {
         const unitCount = parseFloat(prices[name]) || 0;
-        const pricePerUnit = unitCount === 0 ? 0 : 1 / unitCount;
+        const unitPrice = unitCount === 0 ? 0 : 1 / unitCount;
 
         const others = essences.filter(e => e !== name);
         const otherPrices = others.map(e => {
@@ -145,7 +134,7 @@
         });
         const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / otherPrices.length;
 
-        const profit = avgPrice - divRef;
+        const profit = unitPrice - (avgPrice + divRef);
         const isProfit = profit >= 0;
 
         return {
@@ -153,11 +142,13 @@
           priceInput: unitCount,
           profit: profit,
           isProfit: isProfit,
-          pricePerUnit
+          unitPrice: unitPrice
         };
       });
 
       if (sortDescending) {
+        rows.sort((a, b) => a.profit - b.profit);
+      } else {
         rows.sort((a, b) => b.profit - a.profit);
       }
 
@@ -166,7 +157,7 @@
         tr.innerHTML = `
           <td><button class="copy-btn" onclick="copyName('${row.name}')">📋</button></td>
           <td>
-            <img src="${row.name}7.png" alt="${row.name}" class="ess-img">
+            <img src="${row.name}7.png" alt="${row.name}" class="essence-img">
             ${row.name}
           </td>
           <td><input type="number" value="${row.priceInput}" step="1" min="1" onchange="updatePrice('${row.name}', this.value)"></td>
