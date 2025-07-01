@@ -229,28 +229,30 @@
       });
     }
 
-    function loadMedianData() {
-      fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec?mode=median')
-        .then(res => res.json())
-        .then(data => {
-          if (!data || !data.prices) {
-            alert("No median data found.");
-            return;
-          }
+function loadMedianData() {
+  fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec?mode=median')
+    .then(res => res.json())
+    .then(data => {
+      if (!data || !data.prices) {
+        alert("No median data found.");
+        return;
+      }
 
-          data.prices.forEach(item => {
-            prices[item.name] = item.price;
-          });
+      // 修正：オブジェクトをループ
+      Object.entries(data.prices).forEach(([name, price]) => {
+        prices[name] = price;
+      });
 
-          localStorage.setItem("essencePrices", JSON.stringify(prices));
-          document.getElementById("lfDivRate").value = data.lfDivRate || 7150;
-          renderTable();
-        })
-        .catch(err => {
-          alert("Failed to load median data.");
-          console.error(err);
-        });
-    }
+      localStorage.setItem("essencePrices", JSON.stringify(prices));
+      document.getElementById("lfDivRate").value = data.lfDivRate || 7150;
+      renderTable();
+    })
+    .catch(err => {
+      alert("Failed to load median data.");
+      console.error(err);
+    });
+}
+
 
     document.getElementById("lfDivRate").addEventListener("input", renderTable);
     document.getElementById("sortBtn").addEventListener("click", () => {
