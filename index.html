@@ -134,7 +134,8 @@
       prices[name] = saved ? parseFloat(saved) : 0;
     });
 
-    let sortDescending = false;
+    let sortDescending = false;   // 今回は「昇順」にしたい（あとで切り替わる）
+    let sortOnNextRender = false; // 最初のページ表示時に勝手に並び替えないように
 
     function renderTable() {
       const lf = 30;
