@@ -108,13 +108,17 @@
         const diff = e.div - divRef;
 
         const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${e.name}</td>
-          <td>${e.count}</td>
-          <td>${e.div.toFixed(5)}</td>
-          <td>${calc.toFixed(5)}</td>
-          <td class="${diff >= 0 ? 'positive' : 'negative'}">${diff.toFixed(5)}</td>
-        `;
+   tr.innerHTML = `
+  <td>
+    <img src="images/${e.name}7.png" alt="${e.name}" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;">
+    ${e.name}
+  </td>
+  <td>${e.count}</td>
+  <td>${e.div.toFixed(5)}</td>
+  <td>${calc.toFixed(5)}</td>
+  <td class="${diff >= 0 ? 'positive' : 'negative'}">${diff.toFixed(5)}</td>
+`;
+
         tbody.appendChild(tr);
       });
     }
