@@ -177,11 +177,13 @@
 
       if (sortDescending) {
         rows.sort((a, b) => b.profit - a.profit);
+      } else {
+        rows.sort((a, b) => a.profit - b.profit);
       }
 
-document.getElementById("sortBtn").textContent = sortDescending
-  ? "Sort by Profit ▼"
-  : "Sort by Profit ▲";
+      document.getElementById("sortBtn").textContent = sortDescending
+        ? "Sort by Profit ▼"
+        : "Sort by Profit ▲";
 
       rows.forEach(row => {
         const tr = document.createElement("tr");
@@ -219,7 +221,7 @@ document.getElementById("sortBtn").textContent = sortDescending
         }))
       };
 
-     fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec', {
+      fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
@@ -228,7 +230,7 @@ document.getElementById("sortBtn").textContent = sortDescending
     }
 
     function loadMedianData() {
-    fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec')
+      fetch('https://script.google.com/macros/s/AKfycbxFxQu-UOHq7NjjCA8hLIajUl_3qQ3XqjCnvrfSHJuTNVIYZMdNjuH6ZJsBsSUgnImS/exec?mode=median')
         .then(res => res.json())
         .then(data => {
           if (!data || !data.prices) {
@@ -236,10 +238,8 @@ document.getElementById("sortBtn").textContent = sortDescending
             return;
           }
 
-          essences.forEach(ess => {
-            if (data.prices[ess]) {
-              prices[ess] = data.prices[ess];
-            }
+          data.prices.forEach(item => {
+            prices[item.name] = item.price;
           });
 
           localStorage.setItem("essencePrices", JSON.stringify(prices));
