@@ -255,6 +255,7 @@ function sendDataToSheet() {
       sortDescending = !sortDescending;
       localStorage.setItem("sortDescending", JSON.stringify(sortDescending));
       renderTable();
+      sendDataToSheet(); 
     });
 
     renderTable();
