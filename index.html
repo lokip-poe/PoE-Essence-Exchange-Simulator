@@ -6,96 +6,114 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0.5em auto;
-      max-width: 950px;
+      margin: 1em auto;
+      max-width: 1000px;
       padding: 0 1em;
       background-color: #1e1e1e;
       color: #f0f0f0;
       font-size: 14px;
+      overflow-y: auto;
     }
+
     h1 {
       text-align: center;
       color: #ffa500;
       font-size: 20px;
       margin: 0.5em 0;
     }
+
     label {
       display: inline-block;
       margin-right: 1em;
     }
+
     input[type="number"] {
       width: 70px;
       padding: 2px;
       font-size: 14px;
     }
+
     #sortBtn {
       margin: 0.5em 0;
       padding: 4px 10px;
       font-size: 14px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
+      overflow-y: auto;
+      display: block;
+      max-height: 600px;
     }
+
     thead {
       background-color: #333;
       position: sticky;
       top: 0;
     }
+
     th, td {
       border: 1px solid #888;
       padding: 4px;
       text-align: center;
     }
-    .copy-btn {
-      padding: 2px 6px;
-      font-size: 13px;
-      background-color: #444;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    .copy-btn:hover {
-      background-color: #666;
-    }
+
     .positive {
       color: lightgreen;
       font-weight: bold;
     }
+
     .negative {
       color: salmon;
       font-weight: bold;
     }
+
     .red-x {
       color: red;
       font-weight: bold;
+    }
+
+    .copy-btn {
+      cursor: pointer;
+      padding: 2px 6px;
+      background: #444;
+      border: none;
+      color: white;
+      border-radius: 4px;
+    }
+
+    .copy-btn:hover {
+      background: #666;
+    }
+
+    img.icon {
+      width: 20px;
+      height: 20px;
+      vertical-align: middle;
+      margin-right: 4px;
     }
   </style>
 </head>
 <body>
   <h1>Essence Exchange Simulator</h1>
 
+  <p><strong>Used Life Force:</strong> 30</p>
   <label>
-    Life Force（個数）:
-    <input type="number" id="lf" value="30" />
-  </label>
-  <label>
-    Life Forceのdivあたり個数:
+    Div per 1 Life Force:
     <input type="number" id="lfDivRate" value="7150" />
   </label>
-
-  <button id="sortBtn">利益が高い順に並び替え</button>
+  <button id="sortBtn">Sort by Profit ↑</button>
 
   <table>
     <thead>
       <tr>
-        <th>📋</th>
+        <th>Copy</th>
         <th>Essence</th>
-        <th>売価（1divあたりの個数）</th>
-        <th>損益</th>
-        <th>利益（div）</th>
+        <th>Value (1 div = ? units)</th>
+        <th>Profit?</th>
+        <th>Profit (div)</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
@@ -114,12 +132,12 @@
       prices[name] = saved ? parseFloat(saved) : 0;
     });
 
-    let sortDescending = true;
+    let sortDescending = false;
 
     function renderTable() {
-      const lf = parseFloat(document.getElementById("lf").value);
+      const lf = 30;
       const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
-      const cost = 30 / lfDivRate;
+      const cost = lf / lfDivRate;
 
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -133,42 +151,45 @@
           const c = parseFloat(prices[e]);
           return c === 0 ? 0 : 1 / c;
         });
-        const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / others.length;
+        const avgValue = otherPrices.reduce((a, b) => a + b, 0) / otherPrices.length;
 
-        const profit = avgPrice - pricePerUnit - cost;
+        const profit = avgValue - pricePerUnit - cost;
         const isProfit = profit >= 0;
 
         return {
           name,
-          priceInput: unitCount,
-          profit: profit,
-          isProfit: isProfit,
-          pricePerUnit
+          unitCount,
+          pricePerUnit,
+          profit,
+          isProfit
         };
       });
 
-      if (sortDescending) {
-        rows.sort((a, b) => b.profit - a.profit);
-      }
+      rows.sort((a, b) => sortDescending ? b.profit - a.profit : a.profit - b.profit);
 
       rows.forEach(row => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><button class="copy-btn" onclick="copyName('${row.name}')">📋</button></td>
-          <td>${row.name}</td>
-          <td><input type="number" value="${row.priceInput}" step="1" min="1" onchange="updatePrice('${row.name}', this.value)"></td>
+          <td><img src="${row.name}7.png" class="icon" alt="">${row.name}</td>
+          <td><input type="number" value="${row.unitCount}" step="1" min="1"
+                     onchange="updatePrice('${row.name}', this.value)"></td>
           <td class="${row.isProfit ? 'positive' : 'negative'}">
-            ${row.isProfit ? '〇' : '<span class="red-x">×</span>'}
+            ${row.isProfit ? '✔' : '<span class="red-x">×</span>'}
           </td>
           <td>${row.profit.toFixed(5)}</td>
         `;
         tbody.appendChild(tr);
       });
+
+      const btn = document.getElementById("sortBtn");
+      btn.textContent = sortDescending ? "Sort by Profit ↓" : "Sort by Profit ↑";
     }
 
     function updatePrice(name, value) {
-      prices[name] = parseFloat(value) || 0;
-      localStorage.setItem("price_" + name, value);
+      const num = parseFloat(value) || 0;
+      prices[name] = num;
+      localStorage.setItem("price_" + name, num);
       renderTable();
     }
 
@@ -176,29 +197,13 @@
       navigator.clipboard.writeText(name);
     }
 
-    // 保存された値の読み込み
-    document.addEventListener("DOMContentLoaded", () => {
-      const savedLf = localStorage.getItem("lf");
-      const savedRate = localStorage.getItem("lfDivRate");
-      if (savedLf) document.getElementById("lf").value = savedLf;
-      if (savedRate) document.getElementById("lfDivRate").value = savedRate;
-      renderTable();
-    });
-
-    // 入力保存イベント
-    document.getElementById("lf").addEventListener("input", e => {
-      localStorage.setItem("lf", e.target.value);
-      renderTable();
-    });
-    document.getElementById("lfDivRate").addEventListener("input", e => {
-      localStorage.setItem("lfDivRate", e.target.value);
-      renderTable();
-    });
+    document.getElementById("lfDivRate").addEventListener("input", renderTable);
     document.getElementById("sortBtn").addEventListener("click", () => {
       sortDescending = !sortDescending;
       renderTable();
     });
 
+    renderTable();
   </script>
 </body>
 </html>
