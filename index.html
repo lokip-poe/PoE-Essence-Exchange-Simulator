@@ -6,106 +6,101 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0 auto;
-      max-width: 1400px;
-      padding: 10px;
+      margin: 1em auto;
+      max-width: 1000px;
+      padding: 0 1em;
       background-color: #1e1e1e;
       color: #f0f0f0;
-      font-size: 12px;
+      font-size: 14px;
     }
-
     h1 {
       text-align: center;
       color: #ffa500;
       font-size: 20px;
       margin: 0.5em 0;
     }
-
     label {
-      margin-right: 1em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0.5em 1em 0.5em 0;
     }
-
     input[type="number"] {
-      width: 70px;
+      width: 80px;
       padding: 2px;
-      font-size: 12px;
+      font-size: 14px;
     }
-
     #sortBtn {
       margin: 0.5em 0;
       padding: 4px 10px;
-      font-size: 12px;
+      font-size: 14px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 13px;
     }
-
+    thead {
+      background-color: #333;
+      position: sticky;
+      top: 0;
+    }
     th, td {
       border: 1px solid #888;
       padding: 4px;
       text-align: center;
     }
-
-    th {
-      background-color: #333;
+    .copy-btn {
+      cursor: pointer;
+      padding: 2px 6px;
+      font-size: 13px;
+      background-color: #444;
+      border: none;
+      color: white;
+      border-radius: 4px;
     }
-
+    .copy-btn:hover {
+      background-color: #666;
+    }
     .positive {
       color: lightgreen;
       font-weight: bold;
     }
-
     .negative {
       color: salmon;
       font-weight: bold;
     }
-
     .red-x {
       color: red;
       font-weight: bold;
     }
-
-    .copy-btn {
-      cursor: pointer;
-      padding: 2px 6px;
-      background: #444;
-      border: none;
-      color: white;
-      border-radius: 4px;
-      font-size: 12px;
+    .ess-img {
+      width: 30px;
+      height: 30px;
+      vertical-align: middle;
+      margin-right: 6px;
     }
-
-    .copy-btn:hover {
-      background: #666;
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 1em;
-      justify-content: center;
-      margin-bottom: 0.5em;
+    .inline-img {
+      width: 30px;
+      height: 30px;
+      vertical-align: middle;
     }
   </style>
 </head>
 <body>
   <h1>Essence Exchange Simulator</h1>
 
-  <div class="controls">
-    <label>
-      Life Force（個数）:
-      <input type="number" id="lf" value="30" />
-    </label>
-    <label>
-      Life Forceのdivあたり個数:
-      <input type="number" id="lfDivRate" value="7150" />
-    </label>
-    <button id="sortBtn">利益が高い順に並び替え</button>
-  </div>
+  <label>
+    <img src="PrimalLifeforce.png" alt="LF" class="inline-img">
+    Life Force（使う数）:
+    <input type="number" id="lf" value="30" disabled />
+  </label>
+  <label>
+    Life Forceのdivあたり個数:
+    <input type="number" id="lfDivRate" value="7150" />
+  </label>
+
+  <button id="sortBtn">利益が高い順に並び替え</button>
 
   <table>
     <thead>
@@ -133,9 +128,8 @@
     let sortDescending = true;
 
     function renderTable() {
-      const lf = parseFloat(document.getElementById("lf").value);
       const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
-      const cost = lf * (1 / lfDivRate);
+      const divRef = 30 / lfDivRate;
 
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -151,7 +145,7 @@
         });
         const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / otherPrices.length;
 
-        const profit = avgPrice - cost;
+        const profit = avgPrice - divRef;
         const isProfit = profit >= 0;
 
         return {
@@ -171,7 +165,10 @@
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><button class="copy-btn" onclick="copyName('${row.name}')">📋</button></td>
-          <td>${row.name}</td>
+          <td>
+            <img src="${row.name}7.png" alt="${row.name}" class="ess-img">
+            ${row.name}
+          </td>
           <td><input type="number" value="${row.priceInput}" step="1" min="1" onchange="updatePrice('${row.name}', this.value)"></td>
           <td class="${row.isProfit ? 'positive' : 'negative'}">
             ${row.isProfit ? '〇' : '<span class="red-x">×</span>'}
@@ -193,7 +190,6 @@
       });
     }
 
-    document.getElementById("lf").addEventListener("input", renderTable);
     document.getElementById("lfDivRate").addEventListener("input", renderTable);
     document.getElementById("sortBtn").addEventListener("click", () => {
       sortDescending = !sortDescending;
