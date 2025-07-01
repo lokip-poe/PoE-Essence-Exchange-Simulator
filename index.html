@@ -6,100 +6,71 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 1em auto;
-      max-width: 1080px;
+      margin: 0.5em auto;
+      max-width: 950px;
       padding: 0 1em;
       background-color: #1e1e1e;
       color: #f0f0f0;
-      font-size: 13px;
-      overflow-x: hidden;
+      font-size: 14px;
     }
-
     h1 {
       text-align: center;
       color: #ffa500;
       font-size: 20px;
       margin: 0.5em 0;
     }
-
     label {
       display: inline-block;
       margin-right: 1em;
     }
-
     input[type="number"] {
       width: 70px;
       padding: 2px;
-      font-size: 13px;
+      font-size: 14px;
     }
-
     #sortBtn {
-      margin-top: 0.5em;
+      margin: 0.5em 0;
       padding: 4px 10px;
-      font-size: 13px;
+      font-size: 14px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
-      margin-top: 1em;
-      table-layout: fixed;
+      font-size: 13px;
     }
-
     thead {
       background-color: #333;
       position: sticky;
       top: 0;
     }
-
     th, td {
       border: 1px solid #888;
       padding: 4px;
       text-align: center;
-      overflow-wrap: break-word;
     }
-
     .copy-btn {
-      cursor: pointer;
       padding: 2px 6px;
-      background: #444;
-      border: none;
+      font-size: 13px;
+      background-color: #444;
       color: white;
+      border: none;
+      cursor: pointer;
       border-radius: 4px;
     }
-
     .copy-btn:hover {
-      background: #666;
+      background-color: #666;
     }
-
     .positive {
       color: lightgreen;
       font-weight: bold;
     }
-
     .negative {
       color: salmon;
       font-weight: bold;
     }
-
     .red-x {
       color: red;
       font-weight: bold;
-    }
-
-    /* 通知用 */
-    #toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #444;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 4px;
-      display: none;
-      font-size: 14px;
-      z-index: 9999;
     }
   </style>
 </head>
@@ -130,8 +101,6 @@
     <tbody id="tableBody"></tbody>
   </table>
 
-  <div id="toast">Copied!</div>
-
   <script>
     const essences = [
       "Envy", "Scorn", "Spite", "Contempt", "Rage", "Fear", "Zeal",
@@ -140,31 +109,33 @@
     ];
 
     let prices = {};
-    essences.forEach(name => prices[name] = 0);
+    essences.forEach(name => {
+      const saved = localStorage.getItem("price_" + name);
+      prices[name] = saved ? parseFloat(saved) : 0;
+    });
 
     let sortDescending = true;
-    const divRef = 1 / 7150; // ← ここは定数（変換コスト）
 
     function renderTable() {
       const lf = parseFloat(document.getElementById("lf").value);
       const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
-      const cost = lf / lfDivRate;
+      const cost = 30 / lfDivRate;
 
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
 
       const rows = essences.map(name => {
         const unitCount = parseFloat(prices[name]) || 0;
-        const unitPrice = unitCount === 0 ? 0 : 1 / unitCount;
+        const pricePerUnit = unitCount === 0 ? 0 : 1 / unitCount;
 
         const others = essences.filter(e => e !== name);
         const otherPrices = others.map(e => {
           const c = parseFloat(prices[e]);
           return c === 0 ? 0 : 1 / c;
         });
-        const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / otherPrices.length;
+        const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / others.length;
 
-        const profit = unitPrice - (avgPrice + divRef); // 修正済
+        const profit = avgPrice - pricePerUnit - cost;
         const isProfit = profit >= 0;
 
         return {
@@ -172,14 +143,12 @@
           priceInput: unitCount,
           profit: profit,
           isProfit: isProfit,
-          pricePerUnit: unitPrice
+          pricePerUnit
         };
       });
 
       if (sortDescending) {
         rows.sort((a, b) => b.profit - a.profit);
-      } else {
-        rows.sort((a, b) => a.profit - b.profit);
       }
 
       rows.forEach(row => {
@@ -199,27 +168,37 @@
 
     function updatePrice(name, value) {
       prices[name] = parseFloat(value) || 0;
+      localStorage.setItem("price_" + name, value);
       renderTable();
     }
 
     function copyName(name) {
-      navigator.clipboard.writeText(name).then(() => {
-        const toast = document.getElementById("toast");
-        toast.style.display = "block";
-        setTimeout(() => {
-          toast.style.display = "none";
-        }, 1000);
-      });
+      navigator.clipboard.writeText(name);
     }
 
-    document.getElementById("lf").addEventListener("input", renderTable);
-    document.getElementById("lfDivRate").addEventListener("input", renderTable);
+    // 保存された値の読み込み
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedLf = localStorage.getItem("lf");
+      const savedRate = localStorage.getItem("lfDivRate");
+      if (savedLf) document.getElementById("lf").value = savedLf;
+      if (savedRate) document.getElementById("lfDivRate").value = savedRate;
+      renderTable();
+    });
+
+    // 入力保存イベント
+    document.getElementById("lf").addEventListener("input", e => {
+      localStorage.setItem("lf", e.target.value);
+      renderTable();
+    });
+    document.getElementById("lfDivRate").addEventListener("input", e => {
+      localStorage.setItem("lfDivRate", e.target.value);
+      renderTable();
+    });
     document.getElementById("sortBtn").addEventListener("click", () => {
       sortDescending = !sortDescending;
       renderTable();
     });
 
-    renderTable();
   </script>
 </body>
 </html>
