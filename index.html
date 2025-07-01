@@ -4,89 +4,88 @@
   <meta charset="UTF-8" />
   <title>Essence Exchange Simulator</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 1em auto;
-      max-width: 1000px;
-      padding: 0 1em;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
       background-color: #1e1e1e;
       color: #f0f0f0;
-      font-size: 14px;
-      overflow-y: hidden; /* ← ここで縦スクロール禁止 */
+      font-family: Arial, sans-serif;
+      font-size: 13px;
     }
-
+    #container {
+      max-width: 1000px;
+      margin: 0 auto;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
     h1 {
       text-align: center;
       color: #ffa500;
-      font-size: 20px;
-      margin: 0.5em 0;
+      font-size: 18px;
+      margin: 6px 0;
     }
-
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+      margin-bottom: 4px;
+    }
     label {
-      display: inline-block;
-      margin-right: 1em;
+      margin-right: 10px;
     }
-
     input[type="number"] {
-      width: 70px;
-      padding: 2px;
-      font-size: 14px;
+      width: 80px;
+      font-size: 13px;
     }
-
     #sortBtn {
-      margin: 0.5em 0;
       padding: 4px 10px;
-      font-size: 14px;
+      font-size: 13px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
-      max-height: 600px;
+      flex: 1;
+      overflow-y: auto;
     }
-
-    thead {
-      background-color: #333;
-      position: sticky;
-      top: 0;
-    }
-
     th, td {
       border: 1px solid #888;
       padding: 4px;
       text-align: center;
     }
-
+    th {
+      background-color: #333;
+      position: sticky;
+      top: 0;
+    }
     .positive {
       color: lightgreen;
       font-weight: bold;
     }
-
     .negative {
       color: salmon;
       font-weight: bold;
     }
-
     .red-x {
       color: red;
       font-weight: bold;
     }
-
     .copy-btn {
       cursor: pointer;
       padding: 2px 6px;
+      font-size: 12px;
       background: #444;
       border: none;
       color: white;
-      border-radius: 4px;
+      border-radius: 3px;
     }
-
     .copy-btn:hover {
       background: #666;
     }
-
-    img.icon {
+    img.ess-img {
       width: 20px;
       height: 20px;
       vertical-align: middle;
@@ -95,31 +94,31 @@
   </style>
 </head>
 <body>
-  <h1>Essence Exchange Simulator</h1>
-
-<p>
-  <img src="PrimalLifeforce.png" alt="Life Force" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
-  <strong>Used Life Force:</strong> 30
-</p>
-<label>
-  Life Force per 1 Div:
-  <input type="number" id="lfDivRate" value="7150" />
-</label>
-
-  <button id="sortBtn">Sort by Profit ↑</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Copy</th>
-        <th>Essence</th>
-        <th>Value (1 div = ? units)</th>
-        <th>Profit?</th>
-        <th>Profit (div)</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+  <div id="container">
+    <h1>Essence Exchange Simulator</h1>
+    <div class="top-controls">
+      <div>
+        <strong>Used:</strong> 30 LF
+        <label>
+          Div per LF:
+          <input type="number" id="lfDivRate" value="7150" />
+        </label>
+      </div>
+      <button id="sortBtn">Sort by Profit ▼</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Copy</th>
+          <th>Essence</th>
+          <th>Sell Price<br>(1div = ?)</th>
+          <th>Profitable</th>
+          <th>Profit (div)</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
   <script>
     const essences = [
@@ -129,18 +128,13 @@
     ];
 
     let prices = {};
-    essences.forEach(name => {
-      const saved = localStorage.getItem("price_" + name);
-      prices[name] = saved ? parseFloat(saved) : 0;
-    });
+    essences.forEach(name => prices[name] = 0);
 
-    let sortDescending = false;   // 今回は「昇順」にしたい（あとで切り替わる）
-    let sortOnNextRender = false; // 最初のページ表示時に勝手に並び替えないように
+    let sortDescending = false;
 
     function renderTable() {
-      const lf = 30;
       const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
-      const cost = lf / lfDivRate;
+      const cost = 30 / lfDivRate;
 
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -154,46 +148,41 @@
           const c = parseFloat(prices[e]);
           return c === 0 ? 0 : 1 / c;
         });
-        const avgValue = otherPrices.reduce((a, b) => a + b, 0) / otherPrices.length;
+        const avgPrice = otherPrices.reduce((a, b) => a + b, 0) / others.length;
 
-        const profit = avgValue - pricePerUnit - cost;
+        const profit = avgPrice - pricePerUnit - cost;
         const isProfit = profit >= 0;
 
         return {
           name,
-          unitCount,
-          pricePerUnit,
+          priceInput: unitCount,
           profit,
-          isProfit
+          isProfit,
+          pricePerUnit
         };
       });
 
-      rows.sort((a, b) => sortDescending ? b.profit - a.profit : a.profit - b.profit);
+      if (sortDescending) {
+        rows.sort((a, b) => b.profit - a.profit);
+      }
 
       rows.forEach(row => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><button class="copy-btn" onclick="copyName('${row.name}')">📋</button></td>
-          <td><img src="${row.name}7.png" class="icon" alt="">${row.name}</td>
-          <td><input type="number" value="${row.unitCount}" step="1" min="1"
-                     onchange="updatePrice('${row.name}', this.value)"></td>
+          <td><img src="${row.name}7.png" alt="${row.name}" class="ess-img">${row.name}</td>
+          <td><input type="number" value="${row.priceInput}" step="1" min="1" onchange="updatePrice('${row.name}', this.value)"></td>
           <td class="${row.isProfit ? 'positive' : 'negative'}">
-            ${row.isProfit ? '✔' : '<span class="red-x">×</span>'}
+            ${row.isProfit ? '〇' : '<span class="red-x">×</span>'}
           </td>
           <td>${row.profit.toFixed(5)}</td>
         `;
         tbody.appendChild(tr);
       });
-
-      document.getElementById("sortBtn").textContent = sortDescending
-        ? "Sort by Profit ↓"
-        : "Sort by Profit ↑";
     }
 
     function updatePrice(name, value) {
-      const num = parseFloat(value) || 0;
-      prices[name] = num;
-      localStorage.setItem("price_" + name, num);
+      prices[name] = parseFloat(value) || 0;
       renderTable();
     }
 
@@ -204,6 +193,7 @@
     document.getElementById("lfDivRate").addEventListener("input", renderTable);
     document.getElementById("sortBtn").addEventListener("click", () => {
       sortDescending = !sortDescending;
+      document.getElementById("sortBtn").textContent = sortDescending ? "Sort by Profit ▼" : "Sort by Profit ▲";
       renderTable();
     });
 
