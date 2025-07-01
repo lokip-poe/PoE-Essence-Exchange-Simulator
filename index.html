@@ -179,8 +179,9 @@
         rows.sort((a, b) => b.profit - a.profit);
       }
 
-      document.getElementById("sortBtn").textContent = sortDescending
-        ? "Sort by Profit ▼" : "Sort by Profit ▲";
+document.getElementById("sortBtn").textContent = sortDescending
+  ? "Sort by Profit ▼"
+  : "Sort by Profit ▲";
 
       rows.forEach(row => {
         const tr = document.createElement("tr");
