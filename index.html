@@ -6,75 +6,106 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 2em auto;
-      max-width: 1000px;
-      padding: 0 1em;
+      margin: 0 auto;
+      max-width: 1400px;
+      padding: 10px;
       background-color: #1e1e1e;
       color: #f0f0f0;
+      font-size: 12px;
     }
+
     h1 {
       text-align: center;
       color: #ffa500;
+      font-size: 20px;
+      margin: 0.5em 0;
     }
+
+    label {
+      margin-right: 1em;
+    }
+
+    input[type="number"] {
+      width: 70px;
+      padding: 2px;
+      font-size: 12px;
+    }
+
+    #sortBtn {
+      margin: 0.5em 0;
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
     table {
       width: 100%;
-      margin-top: 1em;
       border-collapse: collapse;
+      font-size: 12px;
     }
+
     th, td {
       border: 1px solid #888;
-      padding: 6px;
+      padding: 4px;
       text-align: center;
     }
+
     th {
       background-color: #333;
     }
+
     .positive {
       color: lightgreen;
       font-weight: bold;
     }
+
     .negative {
       color: salmon;
       font-weight: bold;
     }
-    .copy-btn {
-      cursor: pointer;
-      padding: 4px 8px;
-      background: #444;
-      border: none;
-      color: white;
-      border-radius: 4px;
-    }
-    .copy-btn:hover {
-      background: #666;
-    }
+
     .red-x {
       color: red;
       font-weight: bold;
     }
-    input[type="number"] {
-      width: 80px;
+
+    .copy-btn {
+      cursor: pointer;
+      padding: 2px 6px;
+      background: #444;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      font-size: 12px;
     }
-    #sortBtn {
-      margin-top: 1em;
-      padding: 6px 12px;
-      font-size: 1em;
+
+    .copy-btn:hover {
+      background: #666;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1em;
+      justify-content: center;
+      margin-bottom: 0.5em;
     }
   </style>
 </head>
 <body>
   <h1>Essence Exchange Simulator</h1>
 
-  <label>
-    Life Force（個数）:
-    <input type="number" id="lf" value="30" />
-  </label>
-  <label>
-    Life Forceのdivあたり個数:
-    <input type="number" id="lfDivRate" value="7150" />
-  </label>
-
-  <button id="sortBtn">利益が高い順に並び替え</button>
+  <div class="controls">
+    <label>
+      Life Force（個数）:
+      <input type="number" id="lf" value="30" />
+    </label>
+    <label>
+      Life Forceのdivあたり個数:
+      <input type="number" id="lfDivRate" value="7150" />
+    </label>
+    <button id="sortBtn">利益が高い順に並び替え</button>
+  </div>
 
   <table>
     <thead>
@@ -104,7 +135,7 @@
     function renderTable() {
       const lf = parseFloat(document.getElementById("lf").value);
       const lfDivRate = parseFloat(document.getElementById("lfDivRate").value);
-      const cost = lf * (1 / lfDivRate); // 1個あたりdivで計算
+      const cost = lf * (1 / lfDivRate);
 
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -113,7 +144,6 @@
         const unitCount = parseFloat(prices[name]) || 0;
         const pricePerUnit = unitCount === 0 ? 0 : 1 / unitCount;
 
-        // 他19個の平均価格を出す
         const others = essences.filter(e => e !== name);
         const otherPrices = others.map(e => {
           const c = parseFloat(prices[e]);
